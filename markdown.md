@@ -90,8 +90,15 @@ ___
 ###方式二
 ![图片2] [id]
 
-[id]:C:\Users\david\Desktop\1.jpg
+[id]:C:\Users\david\Desktop\1.jpg   
 
+## 页内跳转   
+* [1.语法示例](#1)   
+* [1.1图片](#jump)    
+* [1.2换行](#1.2)   
+* [1.3强调](#1.3)   
+
+   
 ##反斜杠 \
 \*
 
@@ -125,3 +132,10 @@ Fonts, color schemes, layouts and stylesheets are all 100% customizable so you c
 MarkdownPad supports multiple Markdown processing engines, including standard Markdown, Markdown Extra (with Table support) and GitHub Flavored Markdown.
 
 With a tabbed document interface, PDF export, a built-in image uploader, session management, spell check, auto-save, syntax highlighting and a built-in CSS management interface, there's no limit to what you can do with MarkdownPad.
+
+<h2 id="1">1.语法示例</h2>
+**效果查看markdown.md文件   
+
+<span id="jump">1.1图片</span>
+
+
