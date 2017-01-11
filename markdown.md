@@ -5,6 +5,8 @@
 ##### 标题5 #####
 ###### 标题6 ######
 
+<span id="jump">1.1 图片</span>      
+
 ##换行
 加两个空格再回车
 
@@ -67,8 +69,8 @@ ___
 ##链接
 ###方式一
 [hyperlink syntax](http://markdownpad.com),
-###方式二
-[hyperlink syntax] [id]
+###方式二   
+[hyperlink syntax] [id]   
 
 [id]:http://markdownpad.com 'title here'
 
@@ -136,6 +138,8 @@ With a tabbed document interface, PDF export, a built-in image uploader, session
 <h2 id="1">1.语法示例</h2>
 **效果查看markdown.md文件   
 
-<span id="jump">1.1图片</span>
+<h2 id="1.2">1.2 语法示例</h2>   
+<h2 id="1.3">1.3 语法示例</h2>   
+
 
 
