@@ -322,28 +322,28 @@ public static abstract class Stub 跟 在aidl文件中定义的方法
 bindService时创建binder对象   
 
 
-#### AIDL 远程服务 进程间通信 的使用####
-&emsp;2.2.1 定义AIDL接口   
-       通过AIDL文件定义服务(Service)向客户端(Client)提供的接口，我们需要在对应的目录下添加一个后缀为.aidl的文件(注意，不是.java),   
-       IAppAidlInterface.aidl   
-       注：如果服务端与客户端不在同一App上，需要在客户端、服务端两侧都建立该aidl文件   。   
+**AIDL 远程服务 进程间通信 的使用**
+* 定义AIDL接口   
+通过AIDL文件定义服务(Service)向客户端(Client)提供的接口，我们需要在对应的目录下添加一个后缀为.aidl的文件(注意，不是.java),   
+IAppAidlInterface.aidl   
+注：如果服务端与客户端不在同一App上，需要在客户端、服务端两侧都建立该aidl文件   。   
 
-&emsp;2.2.2 创建本地服务 AppService.java ， 在Service中创立对应的stub 对象   
-       // 实现接口中暴露给客户端的Stub--Stub继承自Binder，它实现了IBinder接口   
-       IAppAidlInterface.Stub   
-       并且在onBinder() 方法中返回它   
+* 创建本地服务 AppService.java ， 在Service中创立对应的stub 对象   
+// 实现接口中暴露给客户端的Stub--Stub继承自Binder，它实现了IBinder接口   
+IAppAidlInterface.Stub   
+并且在onBinder() 方法中返回它   
 
-&emsp;2.2.3 调用远程服务   
-       在客户端中建立与Remote Service的连接，获取Stub，然后调用Remote Service提供的方法来获取对应数据   
-       IAppAidlInterface   
-       ServiceConnection   
-       ServiceAliveTestFragment.java   
+* 调用远程服务   
+在客户端中建立与Remote Service的连接，获取Stub，然后调用Remote Service提供的方法来获取对应数据   
+IAppAidlInterface   
+ServiceConnection   
+ServiceAliveTestFragment.java   
 
 **不用AIDL ,使用Binder直接通讯**   
 &emsp;我们将IAppAidlInterface.java拆开来写比如，我们不使用AIDL来实现IPC通讯，而直接用binder来写      
-1.  定义一个继承android.os.IInterface的接口 IRemoteInterface     
-2.  定义一个继承IBinderd的类RemoteInterfaceImpl并实现上面的接口IRemoteInterface    
-3.  RemoteInterfaceImpl 中重写onTransact,在这个方法里面**读取参数，然后写入结果**    
+* 定义一个继承android.os.IInterface的接口 IRemoteInterface     
+* 定义一个继承IBinderd的类RemoteInterfaceImpl并实现上面的接口IRemoteInterface    
+* RemoteInterfaceImpl 中重写onTransact,在这个方法里面**读取参数，然后写入结果**    
     <pre><code> 
          @Override
     protected boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
@@ -364,7 +364,7 @@ bindService时创建binder对象
         return super.onTransact(code, data, reply, flags);
     }
     </code></pre>   
-4.  RemoteInterfaceImpl内部写一个内部代理类， 该代理类代理的就是IRemoteInterface远程接口   
+* RemoteInterfaceImpl内部写一个内部代理类， 该代理类代理的就是IRemoteInterface远程接口   
 <pre>private static class Proxy implements IRemoteInterface</pre>   
 该代理类要做的就是实现IRemoteInterface远程接口，在远程接口里面在这个方法里面**写入参数，然后读取结果**，并将远程Binder作为参数传入，   
 <pre><code>
@@ -413,7 +413,7 @@ bindService时创建binder对象
     }
 </code></pre>   
  
-###26. Service Thread
+###26. Service Thread###
 1. Thread优先级低于Service，Service属于一个系统组件，当内存不足是优先kill掉Thread   
 2. Service由ServiceManager管理，运行在主线程中，而Thread只是一个子线程，比如在Activity里面启动一个Thread，当Activity关掉后，就无法控制Thread了   
 3. Service可以跨进程调用   
