@@ -310,3 +310,5 @@ telecomm\java\com\android\internal\telecom\ITelecomService.aidl 等
 比如常见的有在自己的应用程序中读取手机联系人的信息，这就涉及到 IPC 了。因为自己的应用程序是一个进程，   
 通讯录也是一个进程，只不过获取通讯录的数据信息是通过 Content Provider 的方式来实现的。   
 多个客户端，多个线程并发的情况下要使用 AIDL  
+
+111
