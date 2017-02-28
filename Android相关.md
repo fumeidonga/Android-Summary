@@ -314,5 +314,9 @@ telecomm\java\com\android\internal\telecom\ITelecomService.aidl 等
 ####AIDL工作原理####
 当创建一个IAppAidlInterface.aidl文件后，SDK工具会将aidl文件一个个的编译成继承 android.os.IInterface的java文件   
 查看编译后的 IAppAidlInterface.java 文件   
-<pre><code></code><pre>
+<pre><code>
+public interface IInterface{
+    public IBinder asBinder();
+}
+</code><pre>
 
