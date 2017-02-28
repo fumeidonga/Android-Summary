@@ -318,11 +318,11 @@ telecomm\java\com\android\internal\telecom\ITelecomService.aidl 等
 public interface IInterface{
     public IBinder asBinder();
 }
-</code><pre>
+</code></pre>    
+
 IAppAidlInterface.java文件包含两部分
 public static abstract class Stub 跟 在aidl文件中定义的方法
 bindService时创建binder对象
-
 
 #### AIDL 远程服务 进程间通信 的使用####
 &emsp;2.2.1 定义AIDL接口
