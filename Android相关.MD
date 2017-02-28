@@ -22,7 +22,7 @@
     }
 </code></pre>   
 
-### 2. Activity启动过程，原理 ###
+### 2. Activity启动过程，原理 ###   
 首先要了解[Binder](#binder)机制 
 <pre>
 <code>
