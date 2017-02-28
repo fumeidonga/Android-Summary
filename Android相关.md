@@ -302,4 +302,11 @@ WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
 如果是长时间运行且不需要ui交互的，则用service，同样是在后台运行，不需要交互的情况下，如果只是完成某个任务，之后就不需要运行，而且可能是多个任务，需需要长时间运行的情况下使用Thread;     
 如果任务占用CPU时间多，资源大的情况下，要使用Thread   
 ###27. AIDL
-
+####什么是AIDL, 为什么要用AIDL####
+>为了在不同的进程中进行通讯，获取数据，交互数据等，我们查看源码可以看到大量的AIDL文件
+core\java\android\os\IPermissionController.aidl
+\core\java\android\os\IPowerManager.aidl
+telecomm\java\com\android\internal\telecom\ITelecomService.aidl 等
+比如常见的有在自己的应用程序中读取手机联系人的信息，这就涉及到 IPC 了。因为自己的应用程序是一个进程，
+通讯录也是一个进程，只不过获取通讯录的数据信息是通过 Content Provider 的方式来实现的。
+多个客户端，多个线程并发的情况下要使用 AIDL
