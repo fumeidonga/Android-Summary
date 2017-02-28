@@ -303,10 +303,27 @@ WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
 如果任务占用CPU时间多，资源大的情况下，要使用Thread   
 ###27. AIDL
 ####什么是AIDL, 为什么要用AIDL####
->为了在不同的进程中进行通讯，获取数据，交互数据等，我们查看源码可以看到大量的AIDL文件
-core\java\android\os\IPermissionController.aidl
-\core\java\android\os\IPowerManager.aidl
-telecomm\java\com\android\internal\telecom\ITelecomService.aidl 等
-比如常见的有在自己的应用程序中读取手机联系人的信息，这就涉及到 IPC 了。因为自己的应用程序是一个进程，
-通讯录也是一个进程，只不过获取通讯录的数据信息是通过 Content Provider 的方式来实现的。
-多个客户端，多个线程并发的情况下要使用 AIDL
+>为了在不同的进程中进行通讯，获取数据，交互数据等，我们查看源码可以看到大量的AIDL文件   
+core\java\android\os\IPermissionController.aidl   
+\core\java\android\os\IPowerManager.aidl   
+telecomm\java\com\android\internal\telecom\ITelecomService.aidl 等   
+比如常见的有在自己的应用程序中读取手机联系人的信息，这就涉及到 IPC 了。因为自己的应用程序是一个进程，   
+通讯录也是一个进程，只不过获取通讯录的数据信息是通过 Content Provider 的方式来实现的。   
+多个客户端，多个线程并发的情况下要使用 AIDL   
+####AIDL工作原理####
+当创建一个IAppAidlInterface.aidl文件后，SDK工具会将aidl文件一个个的编译成继承 android.os.IInterface的java文件   
+查看编译后的 IAppAidlInterface.java 文件   
+<pre>
+<code>
+    /**
+    * 接口用来返回IBinder对象
+    */
+    public interface IInterface
+    {
+    public IBinder asBinder();
+    }
+</code>
+</pre>
+IAppAidlInterface.java文件包含两部分   
+public static abstract class Stub 跟 在aidl文件中定义的方法   
+bindService时创建binder对象   
