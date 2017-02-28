@@ -1,4 +1,4 @@
-###1. 按返回键不销毁Activity
+### 1. 按返回键不销毁Activity
 <pre>
 <code>
  //
@@ -21,20 +21,21 @@
         return super.onKeyDown(keyCode, event);
     }
 </code></pre>   
-###2. Activity启动过程，原理###   
+
+### 2. Activity启动过程，原理
 首先要了解[Binder](#binder)机制 
 <pre>
 <code>
  
-</code></pre>   
-###3. 什么是Service？启动过程？原理   
+</code></pre>  
+### 3. 什么是Service？启动过程？原理
 首先要了解[Binder](#binder)机制
 
 <pre>
 <code>
  
 </code></pre>  
-###4. Service 弹出Dialog Toast  
+### 4. Service 弹出Dialog Toast  
 **对于toast**，相对来说比较简单，因为toast可以接受Application的context，可以直接show，也可以写在一个线程里面
 <pre>
 <code>
@@ -119,7 +120,7 @@ dialog.getWindow().setType((WindowManager.LayoutParams.TYPE_SYSTEM_ALERT));
     }
 </code></pre>
 
-###5. Local Service & Remote Service   
+### 5. Local Service & Remote Service   
 Local Service 本地服务，就是一个单纯的Service   
 Remote Service 远程服务 AIDL BINDER
 
@@ -129,123 +130,123 @@ Remote Service 远程服务 AIDL BINDER
 </code></pre>  
 
 ##面试相关
-###6. linux基础命令
+### 6. linux基础命令
 
 <pre>
 <code>
  
 </code></pre>  
 
-###7. Handler原理
+### 7. Handler原理
 
 <pre>
 <code>
  
 </code></pre>  
 
-###8. 动画原理
+### 8. 动画原理
 
 <pre>
 <code>
  
 </code></pre>  
-###9. 做了什么项目，有哪些问题比较深刻，学习到了什么
+### 9. 做了什么项目，有哪些问题比较深刻，学习到了什么
 
 <pre>
 <code>
  
 </code></pre>  
-###10. 技术上的亮点
+### 10. 技术上的亮点
 
 <pre>
 <code>
  
 </code></pre>  
-###11. 单链表的操作
+### 11. 单链表的操作
 
 <pre>
 <code>
  
 </code></pre>  
-###12. 进程与线程的区别
+### 12. 进程与线程的区别
 
 <pre>
 <code>
  
 </code></pre>  
-###13. 递归与for循环是否可以转换 ，递归的弊端
+### 13. 递归与for循环是否可以转换 ，递归的弊端
 
 <pre>
 <code>
  
 </code></pre>  
-###14. 抽象类跟接口
+### 14. 抽象类跟接口
 
 <pre>
 <code>
  
 </code></pre>  
-###15. string stringbuffer
+### 15. string stringbuffer
 
 <pre>
 <code>
  
 </code></pre>  
-###16. handler运行在哪个线程
+### 16. handler运行在哪个线程
 
 <pre>
 <code>
  
 </code></pre>  
-###17. 内存溢出
+### 17. 内存溢出
 
 <pre>
 <code>
  
 </code></pre>  
-###18. 内存优化
+### 18. 内存优化
 
 <pre>
 <code>
  
 </code></pre>  
-###19. Java的runtime机制
+### 19. Java的runtime机制
 
 <pre>
 <code>
  
 </code></pre>  
-###20. 6.0新特性
+### 20. 6.0新特性
 
 <pre>
 <code>
  
 </code></pre>  
-###21. web app交互方式有哪些，promt
+### 21. web app交互方式有哪些，promt
 
 <pre>
 <code>
  
 </code></pre>  
-###22. webview如何启动其他app
+### 22. webview如何启动其他app
 
 <pre>
 <code>
  
 </code></pre>  
-###23. webview防止白屏
+### 23. webview防止白屏
 
 <pre>
 <code>
  
 </code></pre>  
-###24. Service保活
+### 24. Service保活
 
 <pre>
 <code>
  
 </code></pre>  
-###25. Binder 机制
+### 25. Binder 机制
 <span id="binder">Binder</span>   
 在Linux里面进程间是相互隔离的，而Android是基于Linux开发，也充分利用隔离性，那么进程间是怎么通信的(IPC),
 在Linux里面比较常见的几种IPC    
@@ -292,8 +293,8 @@ WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
 它实现了IInterface接口，表明它具有远程Server承诺给Client的能力；Stub是一个抽象类，
 具体的IInterface的相关实现需要我们手动完成，这里使用了策略模式。
 
-###AIDL
-####什么是AIDL, 为什么要用AIDL####
+### AIDL
+### #什么是AIDL, 为什么要用AIDL### #
 >为了在不同的进程中进行通讯，获取数据，交互数据等，我们查看源码可以看到大量的AIDL文件
 core\java\android\os\IPermissionController.aidl
 \core\java\android\os\IPowerManager.aidl
@@ -302,7 +303,7 @@ telecomm\java\com\android\internal\telecom\ITelecomService.aidl 等
 通讯录也是一个进程，只不过获取通讯录的数据信息是通过 Content Provider 的方式来实现的。
 多个客户端，多个线程并发的情况下要使用 AIDL
 
-####AIDL工作原理####
+### #AIDL工作原理### #
 当创建一个IAppAidlInterface.aidl文件后，SDK工具会将aidl文件一个个的编译成继承 android.os.IInterface的java文件
 查看编译后的 IAppAidlInterface.java 文件
 <pre>
@@ -321,7 +322,7 @@ public static abstract class Stub 跟 在aidl文件中定义的方法
 bindService时创建binder对象
 
 
-#### AIDL 远程服务 进程间通信 的使用####
+### # AIDL 远程服务 进程间通信 的使用### #
 &emsp;2.2.1 定义AIDL接口
        通过AIDL文件定义服务(Service)向客户端(Client)提供的接口，我们需要在对应的目录下添加一个后缀为.aidl的文件(注意，不是.java),
        IAppAidlInterface.aidl
@@ -338,7 +339,7 @@ bindService时创建binder对象
        ServiceConnection
        ServiceAliveTestFragment.java
 
-#### 不用AIDL ,使用Binder直接通讯
+### # 不用AIDL ,使用Binder直接通讯
 &emsp;我们将IAppAidlInterface.java拆开来写比如，我们不使用AIDL来实现IPC通讯，而直接用binder来写   
 1.  定义一个继承android.os.IInterface的接口 IRemoteInterface   
 2.  定义一个继承IBinderd的类RemoteInterfaceImpl并实现上面的接口IRemoteInterface   
@@ -412,7 +413,7 @@ bindService时创建binder对象
     }
 </code></pre>
  
-###26. Service Thread
+### 26. Service Thread
 1. Thread优先级低于Service，Service属于一个系统组件，当内存不足是优先kill掉Thread   
 2. Service由ServiceManager管理，运行在主线程中，而Thread只是一个子线程，比如在Activity里面启动一个Thread，当Activity关掉后，就无法控制Thread了   
 3. Service可以跨进程调用   
@@ -420,43 +421,43 @@ bindService时创建binder对象
 如果是长时间运行且不需要ui交互的，则用service，同样是在后台运行，不需要交互的情况下，如果只是完成某个任务，之后就不需要运行，而且可能是多个任务，需需要长时间运行的情况下使用Thread;   
 如果任务占用CPU时间多，资源大的情况下，要使用Thread
 
-###6.
+### 6.
 
 <pre>
 <code>
  
 </code></pre>  
-###6.
+### 6.
 
 <pre>
 <code>
  
 </code></pre>  
-###6.
+### 6.
 
 <pre>
 <code>
  
 </code></pre>  
-###6.
+### 6.
 
 <pre>
 <code>
  
 </code></pre>  
-###6.
+### 6.
 
 <pre>
 <code>
  
 </code></pre>  
-###6.
+### 6.
 
 <pre>
 <code>
  
 </code></pre>  
-###6.
+### 6.
 
 <pre>
 <code>
