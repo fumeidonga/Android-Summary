@@ -121,7 +121,7 @@ dialog.getWindow().setType((WindowManager.LayoutParams.TYPE_SYSTEM_ALERT));
 
 ###5. Local Service & Remote Service   
 Local Service 本地服务，就是一个单纯的Service   
-Remote Service 远程服务 AIDL BINDER
+Remote Service 远程服务 [AIDL](#AIDL) [Binder](#binder)
 
 <pre>
 <code>
@@ -137,12 +137,71 @@ Remote Service 远程服务 AIDL BINDER
 </code></pre>  
 
 ###7. Handler原理
+为什么要有handler，简单来说就是因为不能再主线程以外的地方更新ui，所以handler就出现了。
 
-<pre>
-<code>
- 
-</code></pre>  
+消息队列MessageQueue Looper是何时创建的？   
+1. 对于主线程，即UIThread,查看ActivityThread的main方法，主线程的Looper和MessageQueue就是在此时创建的。   
+2. 当我们之间new Handler对象时，
+<pre><code>
+ Handler mHandler = new Handler(new Handler.Callback() {
+    @Override
+    public boolean handleMessage(Message msg) {
+        return false;
+    }
+});
+//请看Handler的构造方法
+public Handler(Callback callback, boolean async) {
+        if (FIND_POTENTIAL_LEAKS) {
+            final Class<? extends Handler> klass = getClass();
+            if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &&
+                    (klass.getModifiers() & Modifier.STATIC) == 0) {
+                Log.w(TAG, "The following Handler class should be static or leaks might occur: " +
+                    klass.getCanonicalName());
+            }
+        }
+		//创建looper
+        mLooper = Looper.myLooper();
+        if (mLooper == null) {
+            throw new RuntimeException(
+                "Can't create handler inside thread that has not called Looper.prepare()");
+        }
+		//创建queue
+        mQueue = mLooper.mQueue;
+        mCallback = callback;
+        mAsynchronous = async;
+    }
+从代码中可以看到，一个Handler里面包含 looper 跟 queue 引用
+</code></pre>
+3. new 一个Thread时，我们可以参考HandlerThread代码   
+<pre><code>
+@Override
+    public void run() {
+        mTid = Process.myTid();
+        Looper.prepare();
+        synchronized (this) {
+            mLooper = Looper.myLooper();
+            notifyAll();
+        }
+        Process.setThreadPriority(mPriority);
+        onLooperPrepared();
+        Looper.loop();
+        mTid = -1;
+    }
+</code></pre> 
 
+Android 是消息驱动的，我们得搞懂Handler、 Looper、 Message、 MessageQueue之间的关系，知道他们都是什么，我们来分析一下：
+那么 ，首先，我们得有一个消息 Message，   
+其次，有了消息Message后，得把消息存起来吧，于是又了消息队列MessageQueue   
+再次，当消息都在队列里面，那么我们得处理，要处理就得一个一个拿出来吧，那么该怎么拿出来呢，于是我们右创建了一个消息循环Looper，用于循环取出消息   
+最后，我们有了消息，有了消息队列，有了可以取出消息的Looper，那么我们的消
+             息该怎么放入消息队列呢，又如何处理呢？当然就是消息处理Handler了
+总之，它们之间的关系大体如下图：
+![](http://i.imgur.com/67CD8ei.png)   
+在使用Handler前，我们必须明白一点：
+android没有全局的消息队列，消息队列是和某个线程关联在一起的，每个线程有且只有一个消息队列MessageQueue   
+**如何发送消息？**   
+1. 要发送消息，首先要获取一个Message对象，不建议直接new Message,在Message类中有一个静态方法obtain，可以减少内存占用   
+2. 有了Message后，可以直接用Handler的post、sendMessage等方法
 ###8. 动画原理
 
 <pre>
@@ -301,7 +360,7 @@ WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
  
 如果是长时间运行且不需要ui交互的，则用service，同样是在后台运行，不需要交互的情况下，如果只是完成某个任务，之后就不需要运行，而且可能是多个任务，需需要长时间运行的情况下使用Thread;     
 如果任务占用CPU时间多，资源大的情况下，要使用Thread   
-###27. AIDL
+###27. <h3 id="AIDL">AIDL</h3>
 ####什么是AIDL, 为什么要用AIDL####
 >为了在不同的进程中进行通讯，获取数据，交互数据等，我们查看源码可以看到大量的AIDL文件   
 core\java\android\os\IPermissionController.aidl   
