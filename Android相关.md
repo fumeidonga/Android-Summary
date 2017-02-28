@@ -247,7 +247,7 @@ Remote Service 远程服务 AIDL BINDER
  
 </code></pre>  
 
-###25. Binder & AIDL
+###25. Binder
 <h4 id="binder">Binder</h4>  　 
 在Linux里面进程间是相互隔离的，而Android是基于Linux开发，也充分利用隔离性，那么进程间是怎么通信的(IPC),
 在Linux里面比较常见的几种IPC    
@@ -301,3 +301,5 @@ WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
  
 如果是长时间运行且不需要ui交互的，则用service，同样是在后台运行，不需要交互的情况下，如果只是完成某个任务，之后就不需要运行，而且可能是多个任务，需需要长时间运行的情况下使用Thread;     
 如果任务占用CPU时间多，资源大的情况下，要使用Thread   
+###27. AIDL
+
