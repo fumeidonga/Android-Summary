@@ -248,7 +248,7 @@ Remote Service 远程服务 AIDL BINDER
 </code></pre>  
 
 ###25. Binder & AIDL
-<span id="binder">Binder</span>  　 
+<h4 id="binder">Binder</h4>  　 
 在Linux里面进程间是相互隔离的，而Android是基于Linux开发，也充分利用隔离性，那么进程间是怎么通信的(IPC),
 在Linux里面比较常见的几种IPC    
 
@@ -293,3 +293,131 @@ WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
 * 在使用AIDL的时候，编译工具会给我们生成一个Stub的静态内部类；这个类继承了Binder, 说明它是一个Binder本地对象，
 它实现了IInterface接口，表明它具有远程Server承诺给Client的能力；Stub是一个抽象类，
 具体的IInterface的相关实现需要我们手动完成，这里使用了策略模式。
+
+####AIDL
+####什么是AIDL, 为什么要用AIDL####
+>为了在不同的进程中进行通讯，获取数据，交互数据等，我们查看源码可以看到大量的AIDL文件
+core\java\android\os\IPermissionController.aidl
+\core\java\android\os\IPowerManager.aidl
+telecomm\java\com\android\internal\telecom\ITelecomService.aidl 等
+比如常见的有在自己的应用程序中读取手机联系人的信息，这就涉及到 IPC 了。因为自己的应用程序是一个进程，
+通讯录也是一个进程，只不过获取通讯录的数据信息是通过 Content Provider 的方式来实现的。
+多个客户端，多个线程并发的情况下要使用 AIDL
+
+####AIDL工作原理####
+当创建一个IAppAidlInterface.aidl文件后，SDK工具会将aidl文件一个个的编译成继承 android.os.IInterface的java文件
+查看编译后的 IAppAidlInterface.java 文件
+<pre>
+<code>
+    /**
+    * 接口用来返回IBinder对象
+    */
+    public interface IInterface
+    {
+    public IBinder asBinder();
+    }
+</code>
+</pre>
+IAppAidlInterface.java文件包含两部分
+public static abstract class Stub 跟 在aidl文件中定义的方法
+bindService时创建binder对象
+
+
+#### AIDL 远程服务 进程间通信 的使用####
+&emsp;2.2.1 定义AIDL接口
+       通过AIDL文件定义服务(Service)向客户端(Client)提供的接口，我们需要在对应的目录下添加一个后缀为.aidl的文件(注意，不是.java),
+       IAppAidlInterface.aidl
+       注：如果服务端与客户端不在同一App上，需要在客户端、服务端两侧都建立该aidl文件。
+
+&emsp;2.2.2 创建本地服务 AppService.java ， 在Service中创立对应的stub 对象
+       // 实现接口中暴露给客户端的Stub--Stub继承自Binder，它实现了IBinder接口
+       IAppAidlInterface.Stub
+       并且在onBinder() 方法中返回它
+
+&emsp;2.2.3 调用远程服务
+       在客户端中建立与Remote Service的连接，获取Stub，然后调用Remote Service提供的方法来获取对应数据
+       IAppAidlInterface
+       ServiceConnection
+       ServiceAliveTestFragment.java
+
+#### 不用AIDL ,使用Binder直接通讯
+&emsp;我们将IAppAidlInterface.java拆开来写比如，我们不使用AIDL来实现IPC通讯，而直接用binder来写   
+1.  定义一个继承android.os.IInterface的接口 IRemoteInterface   
+2.  定义一个继承IBinderd的类RemoteInterfaceImpl并实现上面的接口IRemoteInterface   
+3.  RemoteInterfaceImpl 中重写onTransact,在这个方法里面**读取参数，然后写入结果**   
+    <pre><code>
+         @Override
+    protected boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+        if(code == INTERFACE_TRANSACTION){
+//            reply.writeString(getInterfaceDescriptor());
+            reply.writeString(DESCRIPTOR);
+            return true;
+        } else if(code == TRANSACTION_log){
+            String message ;
+            //首先读入参数
+            message = data.readString();
+            java.lang.String _result = this.log(message);
+            reply.writeNoException();
+            //将结果写入到reply中
+            reply.writeString(_result);
+            return true;
+        }
+        return super.onTransact(code, data, reply, flags);
+    }
+    </code></pre>
+4.  RemoteInterfaceImpl内部写一个内部代理类， 该代理类代理的就是IRemoteInterface远程接口
+<pre>private static class Proxy implements IRemoteInterface</pre>
+该代理类要做的就是实现IRemoteInterface远程接口，在远程接口里面在这个方法里面**写入参数，然后读取结果**，并将远程Binder作为参数传入，
+<pre><code>
+    private static class Proxy implements IRemoteInterface {
+
+        /**
+         * @param message
+         * @return
+         * @throws RemoteException
+         */
+        @Override
+        public String log(String message) throws RemoteException {
+            android.os.Parcel _data = android.os.Parcel.obtain();
+            android.os.Parcel _reply = android.os.Parcel.obtain();
+            java.lang.String _result;
+            try {
+                _data.writeInterfaceToken(DESCRIPTOR);
+                //首先将参数message写入到_data中去
+                _data.writeString(message);
+                //同时在 远程binder 调用结束后，得到返回的 _reply
+                mRemote.transact(RemoteInterfaceImpl.TRANSACTION_log, _data, _reply, 0);
+                _reply.readException();
+                //在没有异常的情况下，返回_reply.readString()的结果,也就是读取值
+                _result = _reply.readString();
+            } finally {
+                _reply.recycle();
+                _data.recycle();
+            }
+            return _result;
+        }
+        private android.os.IBinder mRemote;
+
+        Proxy(android.os.IBinder remote) {
+            mRemote = remote;
+        }
+
+        @Override
+        public android.os.IBinder asBinder() {
+            return mRemote;
+        }
+
+        public java.lang.String getInterfaceDescriptor() {
+            return DESCRIPTOR;
+        }
+
+    }
+</code></pre>
+ 
+###26. Service Thread
+1. Thread优先级低于Service，Service属于一个系统组件，当内存不足是优先kill掉Thread   
+2. Service由ServiceManager管理，运行在主线程中，而Thread只是一个子线程，比如在Activity里面启动一个Thread，当Activity关掉后，就无法控制Thread了   
+3. Service可以跨进程调用   
+ 
+如果是长时间运行且不需要ui交互的，则用service，同样是在后台运行，不需要交互的情况下，如果只是完成某个任务，之后就不需要运行，而且可能是多个任务，需需要长时间运行的情况下使用Thread;   
+如果任务占用CPU时间多，资源大的情况下，要使用Thread
