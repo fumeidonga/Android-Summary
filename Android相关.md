@@ -167,3 +167,82 @@ Remote Service 远程服务 AIDL BINDER
 <code>
  
 </code></pre>  
+
+###12. 进程与线程的区别
+
+<pre>
+<code>
+ 
+</code></pre>  
+###13. 递归与for循环是否可以转换 ，递归的弊端
+
+<pre>
+<code>
+ 
+</code></pre>  
+###14. 抽象类跟接口
+
+<pre>
+<code>
+ 
+</code></pre>  
+###15. string stringbuffer
+
+<pre>
+<code>
+ 
+</code></pre>  
+###16. handler运行在哪个线程
+
+<pre>
+<code>
+ 
+</code></pre>  
+###17. 内存溢出
+
+<pre>
+<code>
+ 
+</code></pre>  
+###18. 内存优化
+
+<pre>
+<code>
+ 
+</code></pre>  
+###19. Java的runtime机制
+
+<pre>
+<code>
+ 
+</code></pre>  
+###20. 6.0新特性
+
+<pre>
+<code>
+ 
+</code></pre>  
+###21. web app交互方式有哪些，promt
+
+<pre>
+<code>
+ 
+</code></pre>  
+###22. webview如何启动其他app
+
+<pre>
+<code>
+ 
+</code></pre>  
+###23. webview防止白屏
+
+<pre>
+<code>
+ 
+</code></pre>  
+###24. Service保活
+
+<pre>
+<code>
+ 
+</code></pre>  
