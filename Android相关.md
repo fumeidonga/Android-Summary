@@ -250,6 +250,54 @@ public static void loop() {
 最开始Android的入口ActivityThread里面的main方法，里面有一个巨大的Handler，然后会创建一个主线程的looper对象，这也是为什么直接在主线程拿Handler就有Looper的原因，在其他线程是要自己Looper.prepare()的。其实整个Android就是在一个Looper的loop循环的，整个Androidi的一切都是以Handler机制进行的，即只要有代码执行都是通过Handler来执行的，而所谓ANR便是🈯️Looper.loop没有得到及时处理，一旦没有消息，Linux的epoll机制则会通过管道写文件描述符的方式来对主线程进行唤醒与沉睡，android里调用了linux层的代码实现在适当时会睡眠主线程
 ###8. 动画原理
 
+####View Animation（Tween Animation）渐变动画/补间动画
+先来说说这个渐变的动画，View animation只能应用于View对象，而且只支持一部分属性，它只是改变了View对象绘制的位置，而没有改   变View对象本身   
+无论是用纯java代码构建Animation对象，还是通过xml文件定义Animation，其实最终的结果都是   
+<pre><code>Animation a = new AlphaAnimation(); //透明度
+Animation b = new ScaleAnimation(); //缩放
+Animation c = new RotateAnimation(); //旋转
+Animation d = new TranslateAnimation(); //位移
+而我们使用的时候，一般是用这样的形式：
+View.startAnimation(a);
+</code></pre>
+要了解动画的原理，首先得知道[View的绘制流程](#drawable)   
+当view调用startAnimation，我们查看源码，首先就是set一个animation赋值，然后调用invalidate进行view的刷新重绘
+<pre>   public void startAnimation(Animation animation) {
+        animation.setStartTime(Animation.START_ON_FIRST_FRAME);
+        setAnimation(animation);
+        invalidateParentCaches();
+        invalidate(true);
+    }
+
+    public void setAnimation(Animation animation) {
+        mCurrentAnimation = animation;
+
+        if (animation != null) {
+            // If the screen is off assume the animation start time is now instead of
+            // the next frame we draw. Keeping the START_ON_FIRST_FRAME start time
+            // would cause the animation to start when the screen turns back on
+            if (mAttachInfo != null && mAttachInfo.mDisplayState == Display.STATE_OFF
+                    && animation.getStartTime() == Animation.START_ON_FIRST_FRAME) {
+                animation.setStartTime(AnimationUtils.currentAnimationTimeMillis());
+            }
+            animation.reset();
+        }
+    }</pre>
+invalidate调用后经过一系列的判断只重绘需要绘制的view，接下来就到了view的绘制流程中了   
+<pre><code>
+    boolean draw(Canvas canvas, ViewGroup parent, long drawingTime) {
+        ......
+        //这里获取的是前面set的animation
+        final Animation a = getAnimation();
+        if (a != null) {
+            //当view需要动画时，
+            more = drawAnimation(parent, drawingTime, a, scalingRequired);
+            ......
+        } else {
+           ......
+        }</code></pre>  
+在view的drawAnimation中，处理动画的时间、差值器，然后调用Animation.applyTransformation，动画的执行都在Animation的实现类中
+
 <pre>
 <code>
  
@@ -519,3 +567,13 @@ bindService时创建binder对象
 
     }
 </code></pre>
+
+<h3 id="drawable">28. View的绘制流程</h3>
+从大的方面来说大体上分成三步来走，measure，layout，draw      
+measure(测量) 要测量出view多宽，多高   
+layout(布局)  view要画在哪个位置   
+draw(画)      怎么画view   
+我们从Activity SetContentView 说起，setContentView 调用LayoutInflater.inflate()对应的是PhoneWindow 的DecorView， 这是一个   
+FrameLayout，也就是我们常说的根布局，一个DecorView里面又包含两个布局，一个是SystemUI的布局(状态栏)，一个是contentview   
+View 有三种测量规格 MeasureSpec， 精确值，最大值，未指定，view的测量值是由view的MeasureSpec跟view的layoutParams共同决定      
+performMeasure开始，调用view的measure，首先获取到屏幕的宽高，赋值给 measureSpecWidth、measureSpecHeight，如果view本身是个viewGroup，则调用子view的measure，并将上面的参数传入，并传入view的MeasrureSpec(即测量规格)
