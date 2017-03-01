@@ -246,7 +246,7 @@ public static void loop() {
         }
     }
 </code></pre>
-**for (;;) {  //无限循环 为啥不会ANR**
+**for (;;) {  //无限循环 为啥不会ANR**   
 最开始Android的入口ActivityThread里面的main方法，里面有一个巨大的Handler，然后会创建一个主线程的looper对象，这也是为什么直接在主线程拿Handler就有Looper的原因，在其他线程是要自己Looper.prepare()的。其实整个Android就是在一个Looper的loop循环的，整个Androidi的一切都是以Handler机制进行的，即只要有代码执行都是通过Handler来执行的，而所谓ANR便是🈯️Looper.loop没有得到及时处理，一旦没有消息，Linux的epoll机制则会通过管道写文件描述符的方式来对主线程进行唤醒与沉睡，android里调用了linux层的代码实现在适当时会睡眠主线程
 ###8. 动画原理
 
