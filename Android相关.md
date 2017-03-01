@@ -128,7 +128,6 @@ Remote Service 远程服务 [AIDL](#AIDL) [Binder](#binder)
  
 </code></pre>  
 
-##面试相关
 ###6. linux基础命令
 
 <pre>
@@ -314,11 +313,40 @@ invalidate调用后经过一系列的判断只重绘需要绘制的view，接下
 <code>
  
 </code></pre>  
-###11. 单链表的操作
-
+###11. 单链表的操作   
+单链表节点本身有个值，然后还有一个next属性，就是这样一个一个的节点连接起来的
 <pre>
 <code>
- 
+先来定义一个节点类   
+public class Node{
+    public int value;
+    public Node next;
+    public void setValue(...){...}
+    public void setNext(...){...}
+    ....
+}
+Node head = new Node(-1);
+Node tempNode = head;
+/**
+* 首先我们要有一个链表
+*/
+for(int i = 0; i < 3; i++) {
+    Node node = new Node(i);
+    tempNode.next = node;
+    tempNode = node;
+}
+再来一个方法，将链表反序  
+public void test(Node node){
+     Node result = null;
+     Node head = null;
+     Node next = node;
+     while(next != null){
+         result = next;
+	 next.next = head;
+	 head = next;
+	 next = result;
+     }
+}
 </code></pre>  
 
 ###12. 进程与线程的区别
@@ -328,7 +356,8 @@ invalidate调用后经过一系列的判断只重绘需要绘制的view，接下
  
 </code></pre>  
 ###13. 递归与for循环是否可以转换 ，递归的弊端   
-递归跟for是可以转换的，
+递归跟for是可以转换的
+<pre><code>
 for(int i = 0; i < 10; i++){
     for(int j = 0; j < 10; j++){
         System.out.println(""+i+j);
@@ -346,7 +375,8 @@ public void print(String result, int depth){
        
     }
 }
-举个栗子
+</code></pre>   
+举个栗子   
 <pre>
 <code>
  public int sum(int i) {
