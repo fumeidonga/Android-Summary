@@ -327,12 +327,39 @@ invalidate调用后经过一系列的判断只重绘需要绘制的view，接下
 <code>
  
 </code></pre>  
-###13. 递归与for循环是否可以转换 ，递归的弊端
-
+###13. 递归与for循环是否可以转换 ，递归的弊端   
+递归跟for是可以转换的，
+for(int i = 0; i < 10; i++){
+    for(int j = 0; j < 10; j++){
+        System.out.println(""+i+j);
+    }
+}
+public void print(String result, int depth){
+    for(int i = 0; i < 10; i++) {
+       result += i;
+       if(depth == 1){
+          System.out.println(result);
+       } else {
+           print(result, depth -1);
+       }
+       result = result.subString(0, result.length() -1);
+       
+    }
+}
+举个栗子
 <pre>
 <code>
- 
-</code></pre>  
+ public int sum(int i) {
+     if(i > 0){
+         return sum(i -1) + i;
+     } else {
+         return 0;
+     }
+ }
+</code></pre>  
+这是一个求和的递归方法，比如i=10000比较大，循环的调用方法，要额外的增加方法栈的开销，消耗内存容易出错
+<pre>Exception in thread "main" java.lang.StackOverflowError</pre>
+
 ###14. 抽象类跟接口
 
 <pre>
