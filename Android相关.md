@@ -201,7 +201,53 @@ Android 是消息驱动的，我们得搞懂Handler、 Looper、 Message、 Mess
 android没有全局的消息队列，消息队列是和某个线程关联在一起的，每个线程有且只有一个消息队列MessageQueue   
 **如何发送消息？**   
 1. 要发送消息，首先要获取一个Message对象，不建议直接new Message,在Message类中有一个静态方法obtain，可以减少内存占用   
-2. 有了Message后，可以直接用Handler的post、sendMessage等方法
+2. 有了Message后，可以直接用Handler的post、sendMessage等方法   
+**消息如何返回到Handler处理？** 
+查看Looper.loop();源码，有个无限循环方法一直取message   
+<pre><code>
+public static void loop() {
+        final Looper me = myLooper();
+        if (me == null) {
+            throw new RuntimeException("No Looper; Looper.prepare() wasn't called on this thread.");
+        }
+        final MessageQueue queue = me.mQueue;
+        // Make sure the identity of this thread is that of the local process,
+        // and keep track of what that identity token actually is.
+        Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
+        for (;;) {  //无限循环
+            Message msg = queue.next(); // might block
+            if (msg == null) {
+                // No message indicates that the message queue is quitting.
+                return;
+            }
+            // This must be in a local variable, in case a UI event sets the logger
+            Printer logging = me.mLogging;
+            if (logging != null) {
+                logging.println(">>>>> Dispatching to " + msg.target + " " +
+                        msg.callback + ": " + msg.what);
+            }
+            msg.target.dispatchMessage(msg);
+            if (logging != null) {
+                logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
+            }
+            // Make sure that during the course of dispatching the
+            // identity of the thread wasn't corrupted.
+            final long newIdent = Binder.clearCallingIdentity();
+            if (ident != newIdent) {
+                Log.wtf(TAG, "Thread identity changed from 0x"
+                        + Long.toHexString(ident) + " to 0x"
+                        + Long.toHexString(newIdent) + " while dispatching to "
+                        + msg.target.getClass().getName() + " "
+                        + msg.callback + " what=" + msg.what);
+            }
+
+            msg.recycleUnchecked();
+        }
+    }
+</code></pre>
+**for (;;) {  //无限循环 为啥不会ANR**
+最开始Android的入口ActivityThread里面的main方法，里面有一个巨大的Handler，然后会创建一个主线程的looper对象，这也是为什么直接在主线程拿Handler就有Looper的原因，在其他线程是要自己Looper.prepare()的。其实整个Android就是在一个Looper的loop循环的，整个Androidi的一切都是以Handler机制进行的，即只要有代码执行都是通过Handler来执行的，而所谓ANR便是🈯️Looper.loop没有得到及时处理，一旦没有消息，Linux的epoll机制则会通过管道写文件描述符的方式来对主线程进行唤醒与沉睡，android里调用了linux层的代码实现在适当时会睡眠主线程
 ###8. 动画原理
 
 <pre>
