@@ -245,7 +245,8 @@ public static void loop() {
         }
     }
 </code></pre>
-**for (;;) {  //无限循环 为啥不会ANR**   
+**for (;;) {  //无限循环 为啥不会ANR**   
+主线程的looper开启无敌模式，不断的读取消息列表，看是否有消息需要处理   
 最开始Android的入口ActivityThread里面的main方法，里面有一个巨大的Handler，然后会创建一个主线程的looper对象，这也是为什么直接在主线程拿Handler就有Looper的原因，在其他线程是要自己Looper.prepare()的。其实整个Android就是在一个Looper的loop循环的，整个Androidi的一切都是以Handler机制进行的，即只要有代码执行都是通过Handler来执行的，而所谓ANR便是🈯️Looper.loop没有得到及时处理，一旦没有消息，Linux的epoll机制则会通过管道写文件描述符的方式来对主线程进行唤醒与沉睡，android里调用了linux层的代码实现在适当时会睡眠主线程
 ###8. 动画原理
 
@@ -350,11 +351,11 @@ public void test(Node node){
 </code></pre>  
 
 ###12. 进程与线程的区别
+（1）调度：线程作为调度和分配的基本单位，进程作为拥有资源的基本单位
+（2）并发性：不仅进程之间可以并发执行，同一个进程的多个线程之间也可并发执行
+（3）拥有资源：进程是拥有资源的一个独立单位，线程不拥有系统资源，但可以访问隶属于进程的资源.
+（4）系统开销：在创建或撤消进程时，由于系统都要为之分配和回收资源，导致系统的开销明显大于创建或撤消线程时的开销。
 
-<pre>
-<code>
- 
-</code></pre>  
 ###13. 递归与for循环是否可以转换 ，递归的弊端   
 递归跟for是可以转换的
 <pre><code>
@@ -390,23 +391,154 @@ public void print(String result, int depth){
 这是一个求和的递归方法，比如i=10000比较大，循环的调用方法，要额外的增加方法栈的开销，消耗内存容易出错
 <pre>Exception in thread "main" java.lang.StackOverflowError</pre>
 
-###14. 抽象类跟接口
+###14. 抽象类跟接口   
+简单来说，抽象类是自下而上，将一些类共有的特性抽象出来，比如人可以抽象出性别，年龄，身高等等，   
+然后每个人的行为是不一样的，比如说话，唱歌，职业等这些就可以用接口来定义   
+通常情况下，混用貌似没多大的区别，但是在架构层，就可以是整体结构更清晰
+<pre>
+<code>
+public abstract class Person{
+     public abstract String sex();
+     public abstract String age();
+     public abstract String height();
+}
+public interface Action{
+     void speak();
+     void song();
+     void work();
+}
+</code></pre>  
+抽象类方式中，抽象类可以拥有任意范围的成员数据，同时也可以拥有自己的非抽象方法，但是接口方式中，它仅能够有静态、不能修改的成员数据（但是我们一般是不会在接口中使用成员数据），同时它所有的方法都必须是抽象的。在某种程度上来说，接口是抽象类的特殊化。   
+      对子类而言，它只能继承一个抽象类（这是java为了数据安全而考虑的），但是却可以实现多个接口   
+###15. String StringBuffer   
+String的实现中就用到了StringBuffer StringBuilder,要尽量避免使用String a = ""＋"";这种使用+号来拼接字符，因为这样会额外的创建string stringbuffer等对象   
+如果操作少量数据，用string，如果单线程操作大量数据用stringbuilder，多线程操作大量数据用stringbuffer   
+从安全上来说，stringbuffer是线程安全的，它的大部分方法都是用了线程锁synchronized来描述。(信扩奶子的- _-!)   
+stringbuffer & stringbuilder实现上都差不多，可以看源码
+
+stringbuilder一般用在方法内部，应为是线程不安全的，用完后就可以gc掉了
+stringbuffer 一般用在全局变量上，因为不知道这个变量会不会再线程里面
 
 <pre>
 <code>
  
 </code></pre>  
-###15. string stringbuffer
-
+###16. handler运行在哪个线程   
+消息处理的本质是，开启一个无限循环的线程，不断的查询自己的消息队列是否有需要处理的消息
 <pre>
 <code>
- 
-</code></pre>  
-###16. handler运行在哪个线程
+ public class TestRunnableHandler implements Runnable {
 
-<pre>
-<code>
- 
+    public TextView mTextView;
+    public Handler mHandler;
+
+    public TestRunnableHandler(TextView mTextView) {
+        this.mTextView = mTextView;
+    }
+
+    @Override
+    public void run() {
+
+        Looper.prepare();
+        //这个线程里面的handler是不能更新ui的
+        mHandler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                UtilsLog.d(Thread.currentThread().getName());
+                //mTextView.setText(Thread.currentThread().getName());
+            }
+        };
+        UtilsLog.d("Looper.myLooper() " + Looper.myLooper());
+        UtilsLog.d("mHandler.getLooper() " + mHandler.getLooper());
+        mHandler.sendEmptyMessageDelayed(0, 7000);
+        Looper.loop();
+    }
+}
+public class TestThreadHandler extends Thread {
+
+    public TextView mTextView;
+    public Handler mHandler;
+
+    public TestThreadHandler(String name, TextView mTextView) {
+        super(name);
+        this.mTextView = mTextView;
+    }
+
+    //这是一个线程，这里面创建的handler 引用的是main线程的looper
+    @Override
+    public void run() {
+        super.run();
+        //Looper.prepare();
+        mHandler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                UtilsLog.d(Thread.currentThread().getName());
+                mTextView.setText(Thread.currentThread().getName());
+            }
+        };
+        UtilsLog.d("Looper.myLooper() " + Looper.myLooper());
+        UtilsLog.d("mHandler.getLooper() " + mHandler.getLooper());
+        mHandler.sendEmptyMessageDelayed(0, 1000);
+        //Looper.loop();
+    }
+
+    public Handler getmHandler() {
+        return mHandler;
+    }
+}
+public void initHandlerThread() {
+		UtilsLog.d();
+		mHandlerThread = new HandlerThread("my thread");
+		mHandlerThread.start();
+
+		Looper looper = mHandlerThread.getLooper();
+		// 2 这个handler也是不能更新ui的，因为用的是HandlerThread，
+		mHandler = new Handler(looper, new Handler.Callback() {
+			// 该接口的实现就是处理异步耗时任务的，因此该方法执行在子线程中
+			@Override
+			public boolean handleMessage(Message msg) {
+                UtilsLog.d(Thread.currentThread().getName());
+				return false;
+			}
+		}) {
+			@Override
+			public void handleMessage(Message msg) {
+				super.handleMessage(msg);
+                UtilsLog.e(Thread.currentThread().getName());
+				//mTextView.setText(Thread.currentThread().getName());
+			}
+
+		};
+
+		UtilsLog.d("Looper.myLooper() " + Looper.myLooper());
+		UtilsLog.d("mHandler.getLooper() " + mHandler.getLooper());
+		mTestThreadHandler.run();
+		new Thread(new TestRunnableHandler(mTextView)).start();
+
+		mHandler2 = new Handler(){
+			@Override
+			public void handleMessage(Message msg) {
+				super.handleMessage(msg);
+				UtilsLog.d(Thread.currentThread().getName());
+				mTextView.setText(Thread.currentThread().getName());
+			}
+		};
+		mHandler3 = new Handler(){
+			@Override
+			public void handleMessage(Message msg) {
+				super.handleMessage(msg);
+				UtilsLog.d(Thread.currentThread().getName());
+			}
+		};
+
+		UtilsLog.d("mHandler2 " + mHandler2);
+		UtilsLog.d("mHandler3 " + mHandler3);
+		UtilsLog.d("mHandler2.getLooper() " + mHandler2.getLooper());
+		UtilsLog.d("mHandler3.getLooper() " + mHandler3.getLooper());
+
+	}
 </code></pre>  
 ###17. 内存溢出
 
